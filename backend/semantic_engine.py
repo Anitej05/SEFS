@@ -753,7 +753,20 @@ class LLMService:
         if not file_paths:
             return "General"
         
-        prompt = f"Generate a short, descriptive folder name (max 3 words, snake_case) for these files: {', '.join(file_paths)}. Return ONLY the name."
+        filenames = [os.path.basename(fp) for fp in file_paths]
+        content_section = ""
+        if sample_contents:
+            content_section = "\n\nFile content samples:\n" + "\n---\n".join(
+                f"[{filenames[i] if i < len(filenames) else 'file'}]:\n{c[:600]}"
+                for i, c in enumerate(sample_contents)
+            )
+        prompt = (
+            f"You are a file organizer. Based on these filenames AND their contents, "
+            f"generate a short, descriptive folder name (2-3 words, snake_case, lowercase).\n\n"
+            f"Files: {', '.join(filenames)}"
+            f"{content_section}\n\n"
+            f"Return ONLY the folder name, nothing else."
+        )
         
         from cerebras.cloud.sdk import Cerebras
         
@@ -1423,12 +1436,12 @@ class SemanticService:
             file_list = [fp for fp, _ in data["members"]]
             
             if len(data["members"]) <= 10:
-                # Use LLM for descriptive naming
+                # Use LLM for descriptive naming — include file content samples
                 samples = []
-                for fp in file_list[:3]:
+                for fp in file_list[:5]:
                     chunks = self.vector_store.get_document_embeddings(fp)
                     if chunks:
-                        samples.append(chunks[0][2][:500])  # First chunk content
+                        samples.append(chunks[0][2][:800])  # First chunk content
                 
                 folder_name = self.llm_service.generate_cluster_name(file_list, samples)
             else:
