@@ -11,6 +11,18 @@ AI-powered file organization using vector embeddings and LLM clustering.
 - **Backend**: FastAPI + SQLite + FAISS
 - **Frontend**: React + Force Graph
 
+## Demo
+
+https://github.com/user-attachments/assets/IntelligentFileManager.mp4
+
+## Screenshots
+
+### System Architecture
+![System Architecture](assets/SEFS_System_Architecture.jpeg)
+
+### User Interface
+![Dashboard UI](assets/UI.jpeg)
+
 ## Setup
 
 ### Backend
