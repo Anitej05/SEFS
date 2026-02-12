@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+watchdog
+pydantic
+pydantic-settings
+requests
+python-multipart
+websockets
+sentence-transformers
+torch
+faiss-cpu
+numpy
+aiohttp
+openai
+cerebras-cloud-sdk
+PyPDF2

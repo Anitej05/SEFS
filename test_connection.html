@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SEFS Backend Test</title>
+</head>
+<body>
+    <h1>SEFS Backend Connection Test</h1>
+    <button onclick="testConnection()">Test Backend</button>
+    <div id="result"></div>
+
+    <script>
+        async function testConnection() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                // Test root endpoint
+                const response = await fetch('http://localhost:8000/');
+                const data = await response.json();
+                result.innerHTML = `<pre style="color: green;">✓ Backend is running!\n${JSON.stringify(data, null, 2)}</pre>`;
+                
+                // Test system-info
+                const sysInfo = await fetch('http://localhost:8000/system-info');
+                const sysData = await sysInfo.json();
+                result.innerHTML += `<pre style="color: green;">✓ System Info:\n${JSON.stringify(sysData, null, 2)}</pre>`;
+                
+            } catch (err) {
+                result.innerHTML = `<pre style="color: red;">✗ Backend not responding!\nError: ${err.message}\n\nMake sure to start the backend:\ncd backend\npython -m uvicorn main:app --reload</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

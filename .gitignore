@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+*.db
+*.index
+
+# Node
+node_modules/
+dist/
+build/
+.DS_Store
+
+# SEFS Data
+monitored_root/
+upload_storage/
+audio_cache/
+.sefs_cache/
+faiss_index/
+logs/
+
+# IDE
+.vscode/
+.idea/
