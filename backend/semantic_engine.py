@@ -360,6 +360,17 @@ class VectorStore:
             
             # Handle name collision in target folder
             if os.path.exists(new_path) and os.path.normpath(file_path) != os.path.normpath(new_path):
+                # If same file size → it's a duplicate, just remove source & update DB
+                if os.path.getsize(file_path) == os.path.getsize(new_path):
+                    logger.info(f"OS sync: duplicate detected, removing source: {file_path}")
+                    _suppress_watcher_path(file_path)
+                    os.remove(file_path)
+                    with sqlite3.connect(self.db_path) as conn:
+                        conn.execute("UPDATE documents SET file_path = ? WHERE file_path = ?", (new_path, file_path))
+                    old_dir = os.path.dirname(file_path)
+                    self._cleanup_empty_folder(old_dir)
+                    return new_path
+                # Different file with same name → add suffix
                 base, ext = os.path.splitext(filename)
                 counter = 1
                 while os.path.exists(new_path):
@@ -1496,15 +1507,35 @@ class SemanticService:
         processed = 0
         errors = []
         
-        # Collect all files (including in subdirectories)
+        # Get existing cluster names so we can skip their subfolders
+        existing_clusters = set()
+        try:
+            clusters = self.vector_store.get_clusters()
+            existing_clusters = set(clusters.keys())
+        except Exception:
+            pass
+        
+        # Also get all file paths already in the DB to skip re-processing
+        existing_db_paths = set(
+            os.path.normpath(p) for p in self.vector_store.get_all_file_paths()
+        )
+        
+        # Collect files — skip cluster subfolders and hidden directories
         all_files = []
         for root, dirs, files in os.walk(directory_path):
-            # Skip hidden directories and SEFS cache
-            dirs[:] = [d for d in dirs if not d.startswith('.')]
+            # Skip hidden directories, SEFS cache, and existing cluster subfolders
+            dirs[:] = [
+                d for d in dirs
+                if not d.startswith('.') and d not in existing_clusters
+            ]
             for fname in files:
                 if fname.startswith('.'):
                     continue
-                all_files.append(os.path.join(root, fname))
+                fpath = os.path.join(root, fname)
+                # Skip files already tracked in DB (prevents re-processing moved files)
+                if os.path.normpath(fpath) in existing_db_paths:
+                    continue
+                all_files.append(fpath)
         
         if not all_files:
             return {"error": "No files found in directory"}
