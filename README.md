@@ -13,8 +13,10 @@ AI-powered file organization using vector embeddings and LLM clustering.
 
 ## Demo
 
-[![Watch the Demo](assets/UI.jpeg)](assets/IntelligentFileManager.mp4)
-*Click the image above to watch the demo video*
+<div align="center">
+  <video src="https://github.com/Anitej05/SEFS/raw/main/assets/IntelligentFileManager.mp4" controls="controls" muted="muted" style="max-width: 100%;">
+  </video>
+</div>
 
 ## Screenshots
 
